@@ -1,10 +1,9 @@
 "use client"
 import { FormEvent } from "react";
-import { TLinkItem } from "./types";
+import { TCategory, TLinkItem } from "./types";
 import { categories } from "./mockData";
-import LinkForm from "./components/LinkForm";
+import { CategoryForm, LinkForm } from "./components/forms";
 import HomePageProvider, { useHomePageContext } from "./contexts/HomePageProvider";
-
 
 export default function Home() {
   return (
@@ -12,20 +11,14 @@ export default function Home() {
       <main className="flex p-2 justify-center overflow-y-auto mb-10">
         <RenderDialogs />
         <div className="flex flex-col max-w-[30rem] w-full">
-          <div className="flex w-full justify-end">
+          <div className="flex w-full justify-end gap-2 items-center">
+            <AddCategoryBtn />
             <AddLinkBtn />
           </div>
           <div className="flex flex-col gap-8 w-full">
             {
               categories.map(cat => (
-                <article key={cat.id} className="w-full">
-                  <h2 className="text-lg font-medium">{cat.title}</h2>
-                  <ul className="flex flex-col gap-3 w-full">
-                    {cat.children.map(link => (
-                      <li key={link.id}><LinkItem {...link} /></li>
-                    ))}
-                  </ul>
-                </article>
+                <CategoryItem key={cat.id} {...cat} />
               ))
             }
           </div>
@@ -35,8 +28,25 @@ export default function Home() {
   );
 }
 
+function CategoryItem(cat: TCategory) {
+  const { openCategoryForm } = useHomePageContext()
+  return (
+    <article key={cat.id} className="w-full">
+      <header className="w-full flex gap-2 items-center">
+        <h2 className="text-lg font-medium">{cat.title}</h2>
+        <button type="button" className="hover:bg-gray-100 px-2 py-1 rounded text-sm" onClick={() => openCategoryForm({ title: cat.title, id: cat.id })}>Edit</button>
+      </header>
+      <ul className="flex flex-col gap-3 w-full">
+        {cat.children.map(link => (
+          <li key={link.id}><LinkItem {...link} /></li>
+        ))}
+      </ul>
+    </article>
+  )
+}
+
 function RenderDialogs() {
-  const { isShowLinkForm, isShowLinkConfirmDelete } = useHomePageContext()
+  const { isShowLinkForm, isShowLinkConfirmDelete, isShowCategoryForm } = useHomePageContext()
   return (
     <>
       {
@@ -44,6 +54,9 @@ function RenderDialogs() {
       }
       {
         isShowLinkConfirmDelete && <ConfirmLinkDeleteDialog />
+      }
+      {
+        isShowCategoryForm && <CategoryForm />
       }
     </>
   )
@@ -60,6 +73,20 @@ function AddLinkBtn() {
     </button>
   )
 }
+
+function AddCategoryBtn() {
+  const { openCategoryForm } = useHomePageContext()
+  return (
+    <button
+      onClick={() => openCategoryForm()}
+      type="button"
+      className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white">
+      add category
+    </button>
+  )
+}
+
+
 
 
 function LinkItem({ title, url, id, category }: TLinkItem) {

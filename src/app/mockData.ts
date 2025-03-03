@@ -1,4 +1,6 @@
-export const categories = [
+import { TCategory } from "./types";
+
+export const categories: TCategory[] = [
     {
         id: "390393023j2232j",
         title: "Software engineering blogs",
@@ -19,7 +21,7 @@ export const categories = [
                 title: "Tiger abrodi - the saiyan growth",
                 category: "390393023j2232j",
                 url: "https://www.saiyangrowthletter.com",
-                id: "-9ijijlk2n20909u323",
+                id: "9ijijlk2n20909u323",
             },
             {
                 title: "UX collective",

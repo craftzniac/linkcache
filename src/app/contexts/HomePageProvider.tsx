@@ -1,6 +1,7 @@
-import { useState, createContext, ReactNode, useContext } from "react"
-import { TLinkItem } from "../types"
+import { useState, createContext, ReactNode, useContext, useEffect } from "react"
+import { TLinkItem, TCategory } from "../types"
 
+type TSimpleCategory = Omit<TCategory, "children">
 
 const HomePageContext = createContext<{
   closeLinkForm: () => void,
@@ -11,6 +12,10 @@ const HomePageContext = createContext<{
   selectedLink: TLinkItem | null,
   cancelDeleteLink: () => void,
   proceedDeleteLink: () => void
+  openCategoryForm: (category?: TSimpleCategory) => void,
+  isShowCategoryForm: boolean,
+  selectedCategory: TSimpleCategory | null,
+  closeCategoryForm: () => void,
 }>({
   closeLinkForm: () => { },
   triggerDeleteLink: () => { },
@@ -20,6 +25,10 @@ const HomePageContext = createContext<{
   selectedLink: null,
   cancelDeleteLink: () => { },
   proceedDeleteLink: () => { },
+  openCategoryForm: () => { },
+  isShowCategoryForm: false,
+  selectedCategory: null,
+  closeCategoryForm: () => { },
 })
 
 export const useHomePageContext = () => {
@@ -31,6 +40,8 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
   const [isShowLinkConfirmDelete, setIsShowLinkConfirmDelete] = useState(false)
   const [selectedLink, setSelectedLink] = useState<null | TLinkItem>(null)
   const [isShowLinkForm, setIsShowLinkForm] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<null | TSimpleCategory>(null)
+  const [isShowCategoryForm, setIsShowCategoryForm] = useState(false)
 
   function proceedDeleteLink() {
     // make api call to delete link
@@ -58,6 +69,15 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
       proceedDeleteLink,
       isShowLinkConfirmDelete,
       selectedLink,
+      openCategoryForm: (category?: TSimpleCategory) => {
+        setSelectedCategory(category ?? null)
+        setIsShowCategoryForm(true)
+      },
+      isShowCategoryForm,
+      selectedCategory,
+      closeCategoryForm: () => {
+        setIsShowCategoryForm(false)
+      }
     }}>
       {children}
     </HomePageContext.Provider>

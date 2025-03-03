@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { IBM_Plex_Sans } from "next/font/google"
+import ReactQueryProvider from "./contexts/ReactQueryProvider";
 
 const font = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -23,8 +24,10 @@ export default function RootLayout({
       <body
         className={`h-dvh w-dvw text-blue-950 flex flex-col ${font.className}`}
       >
-        <header className="font-bold flex w-full p-2 font-lg text-start">Linkcache</header>
-        {children}
+        <ReactQueryProvider>
+          <header className="font-bold flex w-full p-2 font-lg text-start">Linkcache</header>
+          {children}
+        </ReactQueryProvider>
       </body>
     </html>
   );
