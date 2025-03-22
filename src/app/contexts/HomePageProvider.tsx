@@ -1,21 +1,24 @@
-import { useState, createContext, ReactNode, useContext, useEffect } from "react"
-import { TLinkItem, TCategory } from "../types"
-
-type TSimpleCategory = Omit<TCategory, "children">
+"use client"
+import { useState, createContext, ReactNode, useContext } from "react"
+import { TLinkItem, TSimpleCategory } from "../types"
 
 const HomePageContext = createContext<{
   closeLinkForm: () => void,
-  triggerDeleteLink: (link: TLinkItem) => void,
   openLinkForm: (link?: TLinkItem) => void
   isShowLinkForm: boolean,
   isShowLinkConfirmDelete: boolean,
   selectedLink: TLinkItem | null,
+  triggerDeleteLink: (link: TLinkItem) => void,
   cancelDeleteLink: () => void,
   proceedDeleteLink: () => void
   openCategoryForm: (category?: TSimpleCategory) => void,
   isShowCategoryForm: boolean,
   selectedCategory: TSimpleCategory | null,
   closeCategoryForm: () => void,
+  triggerDeleteCategory: (cat: TSimpleCategory) => void,
+  cancelDeleteCategory: () => void,
+  proceedDeleteCategory: () => void,
+  isShowCategoryConfirmDelete: boolean,
 }>({
   closeLinkForm: () => { },
   triggerDeleteLink: () => { },
@@ -29,6 +32,10 @@ const HomePageContext = createContext<{
   isShowCategoryForm: false,
   selectedCategory: null,
   closeCategoryForm: () => { },
+  triggerDeleteCategory: () => { },
+  cancelDeleteCategory: () => { },
+  proceedDeleteCategory: () => { },
+  isShowCategoryConfirmDelete: false,
 })
 
 export const useHomePageContext = () => {
@@ -42,10 +49,16 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
   const [isShowLinkForm, setIsShowLinkForm] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<null | TSimpleCategory>(null)
   const [isShowCategoryForm, setIsShowCategoryForm] = useState(false)
+  const [isShowCategoryConfirmDelete, setIsShowCategoryConfirmDelete] = useState(false)
 
   function proceedDeleteLink() {
     // make api call to delete link
     console.log("deleting links")
+  }
+
+  function proceedDeleteCategory() {
+    // make api call to delete category
+    console.log("deleting category")
   }
 
   return (
@@ -77,7 +90,18 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
       selectedCategory,
       closeCategoryForm: () => {
         setIsShowCategoryForm(false)
-      }
+      },
+
+      triggerDeleteCategory: (cat: TSimpleCategory) => {
+        setIsShowCategoryConfirmDelete(true)
+        setSelectedCategory(cat)
+      },
+      cancelDeleteCategory: () => {
+        setIsShowCategoryConfirmDelete(false)
+        setSelectedCategory(null)
+      },
+      proceedDeleteCategory,
+      isShowCategoryConfirmDelete,
     }}>
       {children}
     </HomePageContext.Provider>

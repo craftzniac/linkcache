@@ -10,3 +10,9 @@ export type TCategory = {
     id: string,
     children: TLinkItem[]
 }
+
+export type TError = {
+    error: string
+}
+
+export type TSimpleCategory = Omit<TCategory, "children">

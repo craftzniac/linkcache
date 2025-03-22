@@ -4,6 +4,7 @@ import { delay } from "../utils"
 import * as mockdata from "../mockData"
 import { useHomePageContext } from "../contexts/HomePageProvider"
 import { useQuery } from "@tanstack/react-query"
+import * as categoryAction from "@/app/actions/category"
 
 export function LinkForm() {
   const { closeLinkForm, selectedLink } = useHomePageContext()
@@ -14,6 +15,8 @@ export function LinkForm() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    console.log(state)
   }
 
   function handleOnChange(update: { [key in keyof Partial<TLinkItem>]: string }) {
@@ -133,9 +136,14 @@ export function CategoryForm() {
   const { closeCategoryForm, selectedCategory } = useHomePageContext()
   const mode = selectedCategory ? "edit" : "add"
   const [state, setState] = useState(selectedCategory ?? { title: "" })
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    console.log("state:", state)
+
+    const res = await categoryAction.addCategory(state.title)
   }
+
   return (
     <div className="fixed inset-0 bg-white/50 flex flex-col items-start p-2 overflow-auto">
       <div className="flex justify-end w-full">

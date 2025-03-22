@@ -2,6 +2,24 @@ import { TCategory } from "./types";
 
 export const categories: TCategory[] = [
     {
+        id: "02ik3jlkaoijasdfasd",
+        title: "Default",
+        children: [
+            {
+                title: "A Software Engineer's Guide to Reading Research Papers",
+                category: "02ik3jlkaoijasdfasd",
+                url: "https://blog.codingconfessions.com/p/a-software-engineers-guide-to-reading-papers",
+                id: "20923k2lj2lk3j2l23",
+            },
+            {
+                title: "on GPU computing",
+                category: "02ik3jlkaoijasdfasd",
+                url: "https://blog.codingconfessions.com/p/gpu-computing",
+                id: "3i2j3nn3l09aaidfafs",
+            },
+        ]
+    },
+    {
         id: "390393023j2232j",
         title: "Software engineering blogs",
         children: [
