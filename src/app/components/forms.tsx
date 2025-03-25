@@ -1,25 +1,33 @@
 import { useState, FormEvent, useEffect, useCallback } from "react"
-import { TCategory, TLinkItem } from "../types"
-import { delay } from "../utils"
-import * as mockdata from "../mockData"
+import { TCategory, TError, TLink, TNewLink } from "../types"
 import { useHomePageContext } from "../contexts/HomePageProvider"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import * as categoryAction from "@/app/actions/category"
+import CategoryModel from "../datasource/models/Category"
+import LinkModel from "../datasource/models/Link"
 
 export function LinkForm() {
   const { closeLinkForm, selectedLink } = useHomePageContext()
   const mode = selectedLink?.id ? "edit" : "new"
-  const [state, setState] = useState<TLinkItem>(selectedLink || {
+  const [state, setState] = useState<TLink | TNewLink>(selectedLink || {
     title: "", url: "", category: ""
   })
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  const { mutateAsync: addLinkMut, isPending } = useMutation({
+    mutationFn: async (newLink: TNewLink) => {
+      return LinkModel.add(newLink);
+    },
+  })
+
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
     console.log(state)
+    await addLinkMut(state);
   }
 
-  function handleOnChange(update: { [key in keyof Partial<TLinkItem>]: string }) {
+  function handleOnChange(update: { [key in keyof Partial<TLink>]: string }) {
     setState(prev => ({ ...prev, ...update }))
   }
 
@@ -42,7 +50,7 @@ export function LinkForm() {
               <input id="title" type="text" placeholder="A css color generator" className="p-1 rounded" value={state.title} onChange={(e) => handleOnChange({ title: e.target.value })} />
             </div>
             <CategorySelect categoryId={state.category} onChange={useCallback((id) => handleOnChange({ category: id }), [])} />
-            <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white">submit</button>
+            <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white" disabled={isPending}>submit</button>
           </fieldset>
         </form>
       </div>
@@ -58,11 +66,11 @@ function CategorySelect({ categoryId, onChange }: { categoryId: string, onChange
     isLoading: isLoadingCategories,
     isError: isCategoriesError,
     data: categories,
-  } = useQuery<TCategory[]>({
+    error,
+  } = useQuery<TCategory[], TError>({
     queryKey: ["categories"],
     queryFn: async () => {
-      await delay()
-      return mockdata.categories
+      return CategoryModel.getAllWithContent()
     },
   })
 

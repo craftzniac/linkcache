@@ -1,14 +1,16 @@
-export type TLinkItem = {
+export type TLink = {
     title: string,
     url: string,
-    id?: string,
+    id: string,
     category: string
 }
+
+export type TNewLink = Omit<TLink, "id">
 
 export type TCategory = {
     title: string,
     id: string,
-    children: TLinkItem[]
+    children: TLink[]
 }
 
 export type TError = {

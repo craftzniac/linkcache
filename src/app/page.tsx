@@ -16,7 +16,8 @@ export default function Home() {
       alert(res.error)
       return;
     }
-    setCategories(res)
+    console.log("res: ", res);
+    setCategories(res);
   }
 
   useEffect(() => {
