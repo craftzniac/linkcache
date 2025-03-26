@@ -2,8 +2,7 @@ import { TLink, TNewLink } from "@/app/types";
 import connect from "./connect";
 import { objectStores } from "@/app/constants";
 
-export default class Link {
-
+export class IDBLink {
     static async add(newLink: TNewLink): Promise<TLink> {
         return new Promise(async (resolve, reject) => {
             const dbConn = await connect();
@@ -23,14 +22,16 @@ export default class Link {
         })
     }
 
-    static async getAll(categoryId: string): Promise<TLink[]> {
+    static async getAll({ categoryId }: { categoryId: string | number }): Promise<TLink[]> {
         return new Promise(async (resolve, reject) => {
 
             const dbConn = await connect();
 
             const linkObjStore = dbConn.transaction([objectStores.LINKS]).objectStore(objectStores.LINKS);
 
-            const getAllReq = linkObjStore.getAll();
+            // get links based on their category
+            const categoryIndex = linkObjStore.index("category");
+            const getAllReq = categoryIndex.getAll(categoryId);
             getAllReq.onsuccess = () => {
                 resolve(getAllReq.result);
             }

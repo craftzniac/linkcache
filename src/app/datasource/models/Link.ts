@@ -1,5 +1,5 @@
 import { TNewLink, TLink } from "@/app/types";
-import IDBLink from "../indexedDB/Link"
+import { IDBLink } from "../indexedDB/IDBLink"
 
 export default class Link {
     /**
@@ -7,5 +7,9 @@ export default class Link {
      * */
     static async add(newLink: TNewLink): Promise<TLink> {
         return IDBLink.add(newLink);
+    }
+
+    static async getAll({ categoryId }: { categoryId: string | number }): Promise<TLink[]> {
+        return IDBLink.getAll({ categoryId });
     }
 } 

@@ -2,7 +2,7 @@ import { objectStores } from "@/app/constants";
 import connect from "./connect";
 import { TError, TSimpleCategory } from "@/app/types";
 
-export default class Category {
+export class IDBCategory {
     static async getAll() {
         return new Promise<TSimpleCategory[]>(async (resolve, reject) => {
             try {

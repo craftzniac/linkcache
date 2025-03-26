@@ -1,30 +1,70 @@
 import { useState, FormEvent, useEffect, useCallback } from "react"
 import { TCategory, TError, TLink, TNewLink } from "../types"
 import { useHomePageContext } from "../contexts/HomePageProvider"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import * as categoryAction from "@/app/actions/category"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import CategoryModel from "../datasource/models/Category"
 import LinkModel from "../datasource/models/Link"
+import { isValidUrl } from "../utils"
+import { objectStores } from "../constants"
 
 export function LinkForm() {
-  const { closeLinkForm, selectedLink } = useHomePageContext()
-  const mode = selectedLink?.id ? "edit" : "new"
-  const [state, setState] = useState<TLink | TNewLink>(selectedLink || {
+  const defaultState = {
     title: "", url: "", category: ""
-  })
+  };
+  const { closeLinkForm, selectedLink } = useHomePageContext();
+  const mode = selectedLink?.id ? "edit" : "new";
+  const [state, setState] = useState<TLink | TNewLink>(selectedLink || defaultState);
+  const [errorUrl, setErrorUrl] = useState("");
+  const [errorTitle, setErrorTitle] = useState("");
+  const queryClient = useQueryClient();
 
   const { mutateAsync: addLinkMut, isPending } = useMutation({
     mutationFn: async (newLink: TNewLink) => {
       return LinkModel.add(newLink);
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [objectStores.CATEGORIES] });
+    }
   })
-
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    console.log("state: ", state);
 
-    console.log(state)
-    await addLinkMut(state);
+    const errors = {
+      errorUrl: "",
+      errorTitle: ""
+    }
+
+    // input validation
+    if (!state.url) {
+      errors.errorUrl = "Url should not be empty";
+    } else if (isValidUrl(state.url) == false) {
+      errors.errorUrl = "The text is not a valid url";
+    } else {
+      errors.errorUrl = "";
+    }
+
+    if (!state.title) {
+      errors.errorTitle = "Title should not be empty";
+    } else {
+      errors.errorTitle = "";
+    }
+
+
+    setErrorTitle(errors.errorTitle);
+    setErrorUrl(errors.errorUrl);
+    if (errors.errorTitle || errors.errorUrl) {   // force user to handle validation errors before submitting form
+      return;
+    }
+
+    if (mode === "edit") {
+
+    } else {
+      await addLinkMut(state);
+      // clear state
+      setState({ ...defaultState });
+    }
   }
 
   function handleOnChange(update: { [key in keyof Partial<TLink>]: string }) {
@@ -44,12 +84,14 @@ export function LinkForm() {
             <div className="flex flex-col gap-2">
               <label htmlFor="url" className="font-medium">URL</label>
               <input id="url" type="text" placeholder="https://example.com" className="p-1 rounded" value={state.url} onChange={(e) => handleOnChange({ url: e.target.value })} />
+              <p className="text-red-400 text-sm">{errorUrl}</p>
             </div>
             <div className="flex flex-col">
               <label htmlFor="title" className="font-medium">Title</label>
               <input id="title" type="text" placeholder="A css color generator" className="p-1 rounded" value={state.title} onChange={(e) => handleOnChange({ title: e.target.value })} />
+              <p className="text-red-400 text-sm">{errorTitle}</p>
             </div>
-            <CategorySelect categoryId={state.category} onChange={useCallback((id) => handleOnChange({ category: id }), [])} />
+            <CategorySelect mode={mode} categoryId={state.category} onChange={useCallback((id) => handleOnChange({ category: id }), [])} />
             <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white" disabled={isPending}>submit</button>
           </fieldset>
         </form>
@@ -58,8 +100,7 @@ export function LinkForm() {
   )
 }
 
-function CategorySelect({ categoryId, onChange }: { categoryId: string, onChange: (id?: string) => void }) {
-  const mode = categoryId ? "edit" : "new"
+function CategorySelect({ categoryId, onChange, mode }: { categoryId: string, onChange: (id?: string) => void, mode: "edit" | "new" }) {
 
   const [selectedCategory, setSelectedCategory] = useState<undefined | TCategory>(undefined)
   const {
@@ -74,13 +115,22 @@ function CategorySelect({ categoryId, onChange }: { categoryId: string, onChange
     },
   })
 
+  // Select a default category. Use the first category 
   useEffect(() => {
     if (categories) {
-      const newCategory = categories.find(cat => cat.id == categoryId)
-      setSelectedCategory(newCategory)
-      onChange(newCategory?.id)
+      if (!categoryId) {
+        const defaultCategory = categories[0];
+        setSelectedCategory(defaultCategory);
+        onChange(defaultCategory.id);
+      }
     }
-  }, [categories, categoryId, onChange])
+  }, [categories, onChange, categoryId])
+
+  useEffect(() => {  // update category in form state whenever selectedCategory is updated
+    if (categories) {
+      onChange(selectedCategory?.id || "");
+    }
+  }, [onChange, selectedCategory, categories])
 
   return (
     <div className="flex flex-col">
@@ -117,11 +167,9 @@ function CategorySelect({ categoryId, onChange }: { categoryId: string, onChange
               categories && (
                 <select id="category"
                   className="p-1 rounded"
-                  value={categories.length > 0 ? categories[0].id : undefined}
+                  value={selectedCategory?.id}
                   onChange={(e) => {
-                    const newCategory = categories.find(cat => cat.id == e.target.value)
-                    setSelectedCategory(newCategory)
-                    onChange(newCategory?.id)
+                    setSelectedCategory(() => categories.find(cat => cat.id == e.target.value))
                   }}
                 >
                   {
@@ -149,7 +197,6 @@ export function CategoryForm() {
     e.preventDefault()
     console.log("state:", state)
 
-    const res = await categoryAction.addCategory(state.title)
   }
 
   return (

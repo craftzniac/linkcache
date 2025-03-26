@@ -4,3 +4,8 @@ export async function delay() {
     });
 }
 
+
+export function isValidUrl(text: string): boolean {
+    const pattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/
+    return pattern.test(text);
+}

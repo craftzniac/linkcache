@@ -3,26 +3,18 @@ import HomePageProvider from "./contexts/HomePageProvider";
 import Category from "./components/Category";
 import { AddCategoryBtn, AddLinkBtn } from "./components/addButtons";
 import { RenderDialogs } from "./components/dialogs";
-import { useEffect, useState } from "react";
 import CategoryModel from "@/app/datasource/models/Category"
-import { TCategory } from "./types";
+import { TCategory, TError } from "./types";
+import { useQuery } from "@tanstack/react-query";
+import { objectStores } from "./constants";
 
 export default function Home() {
-  const [categories, setCategories] = useState<TCategory[]>([])
-
-  async function fetchCategories() {
-    const res = await CategoryModel.getAllWithContent()
-    if ("error" in res) {
-      alert(res.error)
-      return;
+  const { data: categories, isError, error } = useQuery<TCategory[], TError>({
+    queryKey: [objectStores.CATEGORIES],
+    queryFn: () => {
+      return CategoryModel.getAllWithContent()
     }
-    console.log("res: ", res);
-    setCategories(res);
-  }
-
-  useEffect(() => {
-    fetchCategories()
-  }, [])
+  });
 
   return (
     <HomePageProvider>
@@ -35,9 +27,15 @@ export default function Home() {
           </div>
           <div className="flex flex-col gap-8 w-full">
             {
-              categories.map(cat => (
-                <Category key={cat.id} {...cat} />
-              ))
+              isError ? (
+                <p>{error.error}</p>
+              ) : (
+                categories && (
+                  categories.map(cat => (
+                    <Category key={cat.id} {...cat} />
+                  ))
+                )
+              )
             }
           </div>
         </div>
