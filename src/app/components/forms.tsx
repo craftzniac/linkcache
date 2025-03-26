@@ -1,5 +1,5 @@
 import { useState, FormEvent, useEffect, useCallback } from "react"
-import { TCategory, TError, TLink, TNewLink } from "../types"
+import { TCategory, TError, TLink, TNewLink, TSimpleCategory } from "../types"
 import { useHomePageContext } from "../contexts/HomePageProvider"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import CategoryModel from "../datasource/models/Category"
@@ -197,14 +197,45 @@ function CategorySelect({ categoryId, onChange, mode }: { categoryId: string, on
 
 
 export function CategoryForm() {
-  const { closeCategoryForm, selectedCategory } = useHomePageContext()
-  const mode = selectedCategory ? "edit" : "add"
-  const [state, setState] = useState(selectedCategory ?? { title: "" })
+  const initialState = { title: "" };
+  const { closeCategoryForm, selectedCategory } = useHomePageContext();
+  const mode = selectedCategory ? "edit" : "add";
+  const [state, setState] = useState(mode === "edit" ? (selectedCategory as TSimpleCategory) : initialState);
+  const [errorTitle, setErrorTitle] = useState("");
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: addCategoryMut, isPending: isAddPending } = useMutation({
+    mutationFn: (title: string) => {
+      return CategoryModel.add(title);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [objectStores.CATEGORIES] });
+    }
+  });
+
+  const { mutateAsync: updateCategoryMut, isPending: isUpdatePending } = useMutation({
+    mutationFn: (cat: TSimpleCategory) => {
+      return CategoryModel.update(cat);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [objectStores.CATEGORIES] });
+    }
+  });
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    console.log("state:", state)
-
+    e.preventDefault();
+    if (!state.title) {
+      setErrorTitle("Title should not be empty");
+      return;
+    }
+    setErrorTitle("");
+    if (mode === "edit") {
+      await updateCategoryMut(state as TSimpleCategory);
+    } else {
+      await addCategoryMut(state.title);
+      // clear form state
+      setState(initialState);
+    }
   }
 
   return (
@@ -219,8 +250,9 @@ export function CategoryForm() {
             <div className="flex flex-col">
               <label htmlFor="title" className="font-medium">Title</label>
               <input id="title" type="text" placeholder="Interesting blog posts" className="p-1 rounded" value={state.title} onChange={(e) => setState(prev => ({ ...prev, title: e.target.value }))} />
+              <p className="text-red-400 text-sm">{errorTitle}</p>
             </div>
-            <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white">submit</button>
+            <button disabled={isAddPending || isUpdatePending} className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white">{isAddPending || isUpdatePending ? "submitting..." : "submit"}</button>
           </fieldset>
         </form>
       </div>

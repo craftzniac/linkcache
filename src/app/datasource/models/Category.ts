@@ -4,14 +4,10 @@ import Link from "./Link";
 
 export default class CategoryModel {
     static async getAll() {
-        try {
-            const categories = await IDBCategory.getAll()
-            return categories
-        } catch (err) {
-            return err as TError
-        }
+        const categories = await IDBCategory.getAll()
+        return categories
     }
-    //
+
     /**
      * @throws {TError}
      * */
@@ -26,8 +22,18 @@ export default class CategoryModel {
         return categoriesWithChildren
     }
 
-    static add(categoryName: string): Promise<{ error: string } | TSimpleCategory> {
-        console.log(categoryName)
-        return new Promise((res, rej) => rej({ error: "not impl" }))
+    /**
+     * @throws {TError} if request fails
+     * */
+    static add(title: string): Promise<TSimpleCategory> {
+        return IDBCategory.add({ title });
+    }
+
+    /**
+     * 
+     * @throws {TError} if request fails
+     * */
+    static update(category: TSimpleCategory): Promise<TSimpleCategory> {
+        return IDBCategory.update({ category });
     }
 }
