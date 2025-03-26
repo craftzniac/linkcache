@@ -35,7 +35,7 @@ function db_v1(request: IDBOpenDBRequest, onStoreCreationCompleted?: () => void)
     }
 
     // make sure the object stores have been created before you try to put stuff into it
-    (request.transaction as IDBTransaction).oncomplete = (ev) => {
+    (request.transaction as IDBTransaction).oncomplete = () => {
         // v1 // create a default category  called "Default" in the categories store
         const categoriesObjStore = db.transaction([objectStores.CATEGORIES], "readwrite").objectStore(objectStores.CATEGORIES);
 
@@ -89,7 +89,7 @@ export default async function connect(): Promise<IDBDatabase> {
             resolve((ev.target as IDBOpenDBRequest).result)
         }
         // setup datastores within an upgrade transaction
-        request.onupgradeneeded = (ev) => {
+        request.onupgradeneeded = () => {
             const dbVersion = request.result.version
             switch (dbVersion) {
                 case DB_Version.One:
@@ -102,7 +102,7 @@ export default async function connect(): Promise<IDBDatabase> {
                     throw new Error("Unrecognized database version number");
             }
         }
-        request.onerror = function(ev) {
+        request.onerror = function() {
             reject({ error: "Connection to indexedDB failed: " + request.error?.message })
         }
     })

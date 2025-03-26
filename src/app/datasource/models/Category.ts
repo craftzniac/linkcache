@@ -1,4 +1,4 @@
-import { TCategory, TError, TSimpleCategory } from "@/app/types";
+import { TCategory, TSimpleCategory } from "@/app/types";
 import { IDBCategory } from "../indexedDB/IDBCategory"
 import Link from "./Link";
 

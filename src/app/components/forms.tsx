@@ -115,7 +115,6 @@ function CategorySelect({ categoryId, onChange, mode }: { categoryId: string, on
     isLoading: isLoadingCategories,
     isError: isCategoriesError,
     data: categories,
-    error,
   } = useQuery<TCategory[], TError>({
     queryKey: ["categories"],
     queryFn: async () => {

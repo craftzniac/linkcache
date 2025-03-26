@@ -12,7 +12,7 @@ export class IDBCategory {
             const dbConn = await connect()
             const transaction = dbConn.transaction([objectStores.CATEGORIES], "readonly")
             // catch all errors on this transaction
-            transaction.onerror = (event) => {
+            transaction.onerror = () => {
                 reject({ error: `Couldn't get categories from indexedDB` })
                 return;
             }
@@ -21,7 +21,7 @@ export class IDBCategory {
 
             const cursorRequest = catObjStore.openCursor()
             const categories: TSimpleCategory[] = []
-            cursorRequest.onsuccess = (event) => {
+            cursorRequest.onsuccess = () => {
                 const cursor = cursorRequest.result;
                 if (cursor) {
                     categories.push(cursor.value)

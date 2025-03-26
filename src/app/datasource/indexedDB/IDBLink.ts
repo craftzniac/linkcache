@@ -87,7 +87,7 @@ export class IDBLink {
                     resolve(link);
                 }
             }
-            linkGetReq.onerror = (ev) => {
+            linkGetReq.onerror = () => {
                 reject({ error: "" + linkGetReq.error?.message });
             }
         })
@@ -102,10 +102,10 @@ export class IDBLink {
             const dbConn = await connect();
             const linkObjStore = dbConn.transaction([objectStores.LINKS], "readwrite").objectStore(objectStores.LINKS);
             const delLinkReq = linkObjStore.delete(id);
-            delLinkReq.onsuccess = (ev) => {
+            delLinkReq.onsuccess = () => {
                 resolve(id);
             }
-            delLinkReq.onerror = (ev) => {
+            delLinkReq.onerror = () => {
                 reject({ error: "" + delLinkReq.error?.message })
             }
         })
