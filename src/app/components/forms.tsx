@@ -109,8 +109,6 @@ export function LinkForm() {
 }
 
 function CategorySelect({ categoryId, onChange, mode }: { categoryId: string, onChange: (id?: string) => void, mode: "edit" | "new" }) {
-
-  const [selectedCategory, setSelectedCategory] = useState<undefined | TCategory>(undefined)
   const {
     isLoading: isLoadingCategories,
     isError: isCategoriesError,
@@ -122,18 +120,19 @@ function CategorySelect({ categoryId, onChange, mode }: { categoryId: string, on
     },
   })
 
-  // Select a default category. Use the first category 
-  useEffect(() => {
-    if (categories) {
-      if (!categoryId) {
-        const defaultCategory = categories[0];
-        setSelectedCategory(defaultCategory);
-        onChange(defaultCategory.id);
+  const [selectedCategory, setSelectedCategory] = useState<undefined | TCategory>(() => {
+    if (mode == "new") {
+      if (categories) {
+        return categories[0]
+      }
+    } else {
+      if (categories) {
+        return categories.find(cat => cat.id == categoryId)
       }
     }
-  }, [categories, onChange, categoryId])
+  })
 
-  useEffect(() => {  // update category in form state whenever selectedCategory is updated
+  useEffect(() => {  // update parent form state whenever user selects a different category 
     if (categories) {
       onChange(selectedCategory?.id || "");
     }
@@ -158,7 +157,6 @@ function CategorySelect({ categoryId, onChange, mode }: { categoryId: string, on
                     onChange={(e) => {
                       const newCategory = categories.find(cat => cat.id == e.target.value)
                       setSelectedCategory(newCategory)
-                      onChange(newCategory?.id)
                     }}
                   >
                     {
