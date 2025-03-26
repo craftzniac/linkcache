@@ -1,59 +1,78 @@
 "use client"
 import { useState, createContext, ReactNode, useContext } from "react"
-import { TLinkItem, TSimpleCategory } from "../types"
+import { TLink, TSimpleCategory } from "../types"
+import Link from "../datasource/models/Link"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { objectStores } from "../constants"
 
 const HomePageContext = createContext<{
   closeLinkForm: () => void,
-  openLinkForm: (link?: TLinkItem) => void
+  openLinkForm: (link?: TLink) => void
   isShowLinkForm: boolean,
   isShowLinkConfirmDelete: boolean,
-  selectedLink: TLinkItem | null,
-  triggerDeleteLink: (link: TLinkItem) => void,
-  cancelDeleteLink: () => void,
+  editableLink: TLink | null,
+  triggerDeleteLink: (linkId: string) => void,
+  closeDeleteLinkDialog: () => void,
   proceedDeleteLink: () => void
   openCategoryForm: (category?: TSimpleCategory) => void,
   isShowCategoryForm: boolean,
   selectedCategory: TSimpleCategory | null,
   closeCategoryForm: () => void,
   triggerDeleteCategory: (cat: TSimpleCategory) => void,
-  cancelDeleteCategory: () => void,
+  closeDeleteCategoryDialog: () => void,
   proceedDeleteCategory: () => void,
   isShowCategoryConfirmDelete: boolean,
+  isDeletingLink: boolean,
 }>({
   closeLinkForm: () => { },
   triggerDeleteLink: () => { },
   openLinkForm: () => { },
   isShowLinkForm: false,
   isShowLinkConfirmDelete: false,
-  selectedLink: null,
-  cancelDeleteLink: () => { },
+  editableLink: null,
+  closeDeleteLinkDialog: () => { },
   proceedDeleteLink: () => { },
   openCategoryForm: () => { },
   isShowCategoryForm: false,
   selectedCategory: null,
   closeCategoryForm: () => { },
   triggerDeleteCategory: () => { },
-  cancelDeleteCategory: () => { },
+  closeDeleteCategoryDialog: () => { },
   proceedDeleteCategory: () => { },
   isShowCategoryConfirmDelete: false,
+  isDeletingLink: false,
 })
 
 export const useHomePageContext = () => {
   return useContext(HomePageContext)
 }
 
-
 export default function HomePageProvider({ children }: { children: ReactNode }) {
-  const [isShowLinkConfirmDelete, setIsShowLinkConfirmDelete] = useState(false)
-  const [selectedLink, setSelectedLink] = useState<null | TLinkItem>(null)
-  const [isShowLinkForm, setIsShowLinkForm] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<null | TSimpleCategory>(null)
-  const [isShowCategoryForm, setIsShowCategoryForm] = useState(false)
-  const [isShowCategoryConfirmDelete, setIsShowCategoryConfirmDelete] = useState(false)
+  const [isShowLinkConfirmDelete, setIsShowLinkConfirmDelete] = useState(false);
+  const [editableLink, setEditableLink] = useState<null | TLink>(null);
+  const [isShowLinkForm, setIsShowLinkForm] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<null | TSimpleCategory>(null);
+  const [isShowCategoryForm, setIsShowCategoryForm] = useState(false);
+  const [isShowCategoryConfirmDelete, setIsShowCategoryConfirmDelete] = useState(false);
+  const [delLinkId, setDelLinkId] = useState<string | null>(null);
 
-  function proceedDeleteLink() {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: deleteLink, isPending: isDeletingLink } = useMutation({
+    mutationFn: () => {
+      return Link.delete({ id: delLinkId as string })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [objectStores.CATEGORIES] });
+    }
+  });
+
+
+  async function proceedDeleteLink() {
     // make api call to delete link
-    console.log("deleting links")
+    await deleteLink();
+    // close the link delete dialog
+    closeDeleteLinkDialog();
   }
 
   function proceedDeleteCategory() {
@@ -61,47 +80,65 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
     console.log("deleting category")
   }
 
+  function openLinkForm(link?: TLink) {
+    setEditableLink(
+      link ?? null
+    )
+    setIsShowLinkForm(true)
+  }
+
+  function closeLinkForm() {
+    setIsShowLinkForm(false);
+  }
+
+  function triggerDeleteLink(linkId: string) {
+    setIsShowLinkConfirmDelete(true)
+    setDelLinkId(linkId);
+  }
+
+  function closeDeleteLinkDialog() {
+    setIsShowLinkConfirmDelete(false);
+    setDelLinkId(null);
+  }
+
+  function openCategoryForm(category?: TSimpleCategory) {
+    setSelectedCategory(category ?? null)
+    setIsShowCategoryForm(true)
+  }
+
+  function closeCategoryForm() {
+    setIsShowCategoryForm(false)
+  }
+
+  function triggerDeleteCategory(cat: TSimpleCategory) {
+    setIsShowCategoryConfirmDelete(true)
+    setSelectedCategory(cat)
+  }
+
+  function closeDeleteCategoryDialog() {
+    setIsShowCategoryConfirmDelete(false)
+    setSelectedCategory(null)
+  }
+
   return (
     <HomePageContext.Provider value={{
-      closeLinkForm: () => setIsShowLinkForm(false),
-      openLinkForm: (link?: TLinkItem) => {
-        setSelectedLink(
-          link ?? null
-        )
-        setIsShowLinkForm(true)
-      },
+      closeLinkForm,
+      openLinkForm,
       isShowLinkForm,
-      triggerDeleteLink: (link: TLinkItem) => {
-        setIsShowLinkConfirmDelete(true)
-        setSelectedLink(link)
-      },
-      cancelDeleteLink: () => {
-        setIsShowLinkConfirmDelete(false)
-        setSelectedLink(null)
-      },
+      triggerDeleteLink,
+      closeDeleteLinkDialog,
       proceedDeleteLink,
       isShowLinkConfirmDelete,
-      selectedLink,
-      openCategoryForm: (category?: TSimpleCategory) => {
-        setSelectedCategory(category ?? null)
-        setIsShowCategoryForm(true)
-      },
+      editableLink,
+      openCategoryForm,
       isShowCategoryForm,
       selectedCategory,
-      closeCategoryForm: () => {
-        setIsShowCategoryForm(false)
-      },
-
-      triggerDeleteCategory: (cat: TSimpleCategory) => {
-        setIsShowCategoryConfirmDelete(true)
-        setSelectedCategory(cat)
-      },
-      cancelDeleteCategory: () => {
-        setIsShowCategoryConfirmDelete(false)
-        setSelectedCategory(null)
-      },
+      closeCategoryForm,
+      triggerDeleteCategory,
+      closeDeleteCategoryDialog,
       proceedDeleteCategory,
       isShowCategoryConfirmDelete,
+      isDeletingLink
     }}>
       {children}
     </HomePageContext.Provider>

@@ -4,16 +4,16 @@ import { useHomePageContext } from "../contexts/HomePageProvider"
 import { CategoryForm, LinkForm } from "./forms"
 
 export function ConfirmCategoryDeleteDialog() {
-  const { cancelDeleteCategory, proceedDeleteCategory } = useHomePageContext()
-  return <ConfirmDeleteDialog cancel={cancelDeleteCategory} proceed={proceedDeleteCategory} msg="Permanently delete this category?" />
+  const { closeDeleteCategoryDialog, proceedDeleteCategory } = useHomePageContext()
+  return <ConfirmDeleteDialog close={closeDeleteCategoryDialog} proceed={proceedDeleteCategory} msg="Permanently delete this category?" />
 }
 
 export function ConfirmLinkDeleteDialog() {
-  const { cancelDeleteLink, proceedDeleteLink } = useHomePageContext()
-  return <ConfirmDeleteDialog cancel={cancelDeleteLink} proceed={proceedDeleteLink} msg="Are you sure you want this link deleted?" />
+  const { closeDeleteLinkDialog, proceedDeleteLink, isDeletingLink } = useHomePageContext()
+  return <ConfirmDeleteDialog isDeleting={isDeletingLink} close={closeDeleteLinkDialog} proceed={proceedDeleteLink} msg="Are you sure you want this link deleted?" />
 }
 
-function ConfirmDeleteDialog({ msg, cancel, proceed }: { msg: string, cancel: () => void, proceed: () => void }) {
+function ConfirmDeleteDialog({ msg, close, proceed, isDeleting = false }: { msg: string, close: () => void, proceed: () => void, isDeleting?: boolean }) {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
   }
@@ -23,8 +23,8 @@ function ConfirmDeleteDialog({ msg, cancel, proceed }: { msg: string, cancel: ()
         <h3 className="text-lg font-medium">Confirm Delete</h3>
         <p className="opacity-90">{msg}</p>
         <div className="flex justify-end gap-1 text-sm mt-2">
-          <button type="button" className="rounded px-2 py-1 text-red-400" onClick={proceed}>Delete</button>
-          <button type="button" className="rounded px-2 py-1 text-white bg-blue-900/70 hover:bg-blue-900/90 transition-colors" onClick={cancel}>Cancel</button>
+          <button type="button" className="rounded px-2 py-1 text-red-400" onClick={proceed}>{isDeleting ? "Deleting..." : "Delete"}</button>
+          <button type="button" className="rounded px-2 py-1 text-white bg-blue-900/70 hover:bg-blue-900/90 transition-colors" onClick={close}>Cancel</button>
         </div>
       </form>
     </div>

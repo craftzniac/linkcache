@@ -11,9 +11,9 @@ export function LinkForm() {
   const defaultState = {
     title: "", url: "", category: ""
   };
-  const { closeLinkForm, selectedLink } = useHomePageContext();
-  const mode = selectedLink?.id ? "edit" : "new";
-  const [state, setState] = useState<TLink | TNewLink>(selectedLink || defaultState);
+  const { closeLinkForm, editableLink } = useHomePageContext();
+  const mode = editableLink?.id ? "edit" : "new";
+  const [state, setState] = useState<TLink | TNewLink>(editableLink || defaultState);
   const [errorUrl, setErrorUrl] = useState("");
   const [errorTitle, setErrorTitle] = useState("");
   const queryClient = useQueryClient();

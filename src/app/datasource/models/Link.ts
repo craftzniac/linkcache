@@ -12,4 +12,8 @@ export default class Link {
     static async getAll({ categoryId }: { categoryId: string | number }): Promise<TLink[]> {
         return IDBLink.getAll({ categoryId });
     }
+
+    static async delete({ id }: { id: string }) {
+        return IDBLink.delete({ id });
+    }
 } 
