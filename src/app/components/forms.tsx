@@ -18,7 +18,7 @@ export function LinkForm() {
   const [errorTitle, setErrorTitle] = useState("");
   const queryClient = useQueryClient();
 
-  const { mutateAsync: addLinkMut, isPending } = useMutation({
+  const { mutateAsync: addLinkMut, isPending: isAddLinkPending } = useMutation({
     mutationFn: async (newLink: TNewLink) => {
       return LinkModel.add(newLink);
     },
@@ -27,9 +27,17 @@ export function LinkForm() {
     }
   })
 
+  const { mutateAsync: editLinkMut, isPending: isEditLinkPending } = useMutation({
+    mutationFn: async (link: TLink) => {
+      return LinkModel.update(link);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [objectStores.CATEGORIES] });
+    }
+  })
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    console.log("state: ", state);
 
     const errors = {
       errorUrl: "",
@@ -59,7 +67,7 @@ export function LinkForm() {
     }
 
     if (mode === "edit") {
-
+      await editLinkMut(state as TLink);
     } else {
       await addLinkMut(state);
       // clear state
@@ -92,7 +100,7 @@ export function LinkForm() {
               <p className="text-red-400 text-sm">{errorTitle}</p>
             </div>
             <CategorySelect mode={mode} categoryId={state.category} onChange={useCallback((id) => handleOnChange({ category: id }), [])} />
-            <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white" disabled={isPending}>submit</button>
+            <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white" disabled={isAddLinkPending || isEditLinkPending}>submit</button>
           </fieldset>
         </form>
       </div>

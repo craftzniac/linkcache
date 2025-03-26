@@ -26,6 +26,73 @@ export class IDBLink {
         })
     }
 
+
+    /**
+     * update a link
+     * @throws {TError} if request fails
+     * */
+    static async update(link: TLink): Promise<TLink> {
+        return new Promise(async (resolve, reject) => {
+            const dbConn = await connect();
+            let linkObjStore = dbConn.transaction([objectStores.LINKS], "readwrite").objectStore(objectStores.LINKS);
+
+            const oldLink = await IDBLink.get({ linkId: link.id });
+            if (!oldLink) {
+                reject({ error: "Link does not exist" });
+                return;
+            }
+
+            // update the link
+            oldLink.title = link.title;
+            oldLink.url = link.url;
+            oldLink.category = link.category;
+
+            // create a new transaction to put the updated link back into the db
+            linkObjStore = dbConn.transaction([objectStores.LINKS], "readwrite").objectStore(objectStores.LINKS);
+            // put it back into the store
+            const updateReq = linkObjStore.put(oldLink);
+            updateReq.onsuccess = () => {
+                resolve(oldLink);
+                return;
+            }
+            updateReq.onerror = () => {
+                reject({ error: "Couldn't update link: " + updateReq.error?.message })
+            }
+
+        })
+    }
+
+
+    /**
+     *  get link using it's id
+     *  @throws {TError} if request fails
+     * */
+    static async get({ linkId, dbConn }: { linkId: string, dbConn?: IDBDatabase }): Promise<TLink | null> {
+        return new Promise(async (resolve, reject) => {
+            let conn: IDBDatabase;
+            if (!dbConn) {
+                conn = await connect();
+            } else {
+                conn = dbConn;
+            }
+
+            const linkObjStore = conn.transaction(objectStores.LINKS, "readwrite").objectStore(objectStores.LINKS);
+
+            const linkGetReq = linkObjStore.get(linkId);
+            linkGetReq.onsuccess = () => {
+                const link = linkGetReq.result;
+                if (!link) {
+                    resolve(null);
+                } else {
+                    resolve(link);
+                }
+            }
+            linkGetReq.onerror = (ev) => {
+                reject({ error: "" + linkGetReq.error?.message });
+            }
+        })
+    }
+
     /**
      * @throws {TError} if request fails
      * @returns {string} a string that represents the id of the deleted link
