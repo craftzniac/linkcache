@@ -112,4 +112,23 @@ export class IDBCategory {
             }
         });
     }
+
+    /**
+     * @throws {TError} if request fails
+     * @returns {string} a string that represents the id of the deleted category
+     * */
+    static async delete({ id }: { id: string }): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const dbConn = await connect();
+            const categoryObjStore = dbConn.transaction(objectStores.CATEGORIES, "readwrite").objectStore(objectStores.CATEGORIES);
+            const delReq = categoryObjStore.delete(id);
+            delReq.onsuccess = () => {
+                resolve(id);
+            }
+            delReq.onerror = () => {
+                reject({ error: "" + delReq.error?.message });
+            }
+        });
+    }
+
 }

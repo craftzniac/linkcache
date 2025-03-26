@@ -36,4 +36,12 @@ export default class CategoryModel {
     static update(category: TSimpleCategory): Promise<TSimpleCategory> {
         return IDBCategory.update({ category });
     }
+
+
+    /**
+     * @throws {TError} if request fails
+     * */
+    static delete(id: string): Promise<string> {
+        return IDBCategory.delete({ id });
+    }
 }

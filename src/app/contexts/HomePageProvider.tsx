@@ -4,6 +4,7 @@ import { TLink, TSimpleCategory } from "../types"
 import Link from "../datasource/models/Link"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { objectStores } from "../constants"
+import CategoryModel from "../datasource/models/Category"
 
 const HomePageContext = createContext<{
   closeLinkForm: () => void,
@@ -23,6 +24,7 @@ const HomePageContext = createContext<{
   proceedDeleteCategory: () => void,
   isShowCategoryConfirmDelete: boolean,
   isDeletingLink: boolean,
+  isDeletingCategory: boolean,
 }>({
   closeLinkForm: () => { },
   triggerDeleteLink: () => { },
@@ -41,6 +43,7 @@ const HomePageContext = createContext<{
   proceedDeleteCategory: () => { },
   isShowCategoryConfirmDelete: false,
   isDeletingLink: false,
+  isDeletingCategory: false,
 })
 
 export const useHomePageContext = () => {
@@ -67,6 +70,15 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
     }
   });
 
+  const { mutateAsync: deleteCategory, isPending: isDeletingCategory } = useMutation({
+    mutationFn: (id: string) => {
+      return CategoryModel.delete(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [objectStores.CATEGORIES] });
+    }
+  });
+
 
   async function proceedDeleteLink() {
     // make api call to delete link
@@ -75,9 +87,12 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
     closeDeleteLinkDialog();
   }
 
-  function proceedDeleteCategory() {
+  async function proceedDeleteCategory() {
     // make api call to delete category
-    console.log("deleting category")
+    if (selectedCategory?.id) {
+      await deleteCategory(selectedCategory.id);
+      closeDeleteCategoryDialog();
+    }
   }
 
   function openLinkForm(link?: TLink) {
@@ -138,7 +153,8 @@ export default function HomePageProvider({ children }: { children: ReactNode }) 
       closeDeleteCategoryDialog,
       proceedDeleteCategory,
       isShowCategoryConfirmDelete,
-      isDeletingLink
+      isDeletingLink,
+      isDeletingCategory
     }}>
       {children}
     </HomePageContext.Provider>

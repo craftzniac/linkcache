@@ -4,8 +4,8 @@ import { useHomePageContext } from "../contexts/HomePageProvider"
 import { CategoryForm, LinkForm } from "./forms"
 
 export function ConfirmCategoryDeleteDialog() {
-  const { closeDeleteCategoryDialog, proceedDeleteCategory } = useHomePageContext()
-  return <ConfirmDeleteDialog close={closeDeleteCategoryDialog} proceed={proceedDeleteCategory} msg="Permanently delete this category?" />
+  const { closeDeleteCategoryDialog, proceedDeleteCategory, isDeletingCategory } = useHomePageContext()
+  return <ConfirmDeleteDialog isDeleting={isDeletingCategory} close={closeDeleteCategoryDialog} proceed={proceedDeleteCategory} msg="Permanently delete this category?" />
 }
 
 export function ConfirmLinkDeleteDialog() {
