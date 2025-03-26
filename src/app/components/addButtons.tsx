@@ -12,13 +12,13 @@ export function AddLinkBtn() {
   )
 }
 
-export function AddCategoryBtn() {
+export function AddCategoryBtn({ isPrimary = false }: { isPrimary?: boolean }) {
   const { openCategoryForm } = useHomePageContext()
   return (
     <button
       onClick={() => openCategoryForm()}
       type="button"
-      className="rounded border-2 border-gray-900/10 hover:border-gray-900/50 transition-colors px-2 py-1 text-blue-950">
+      className={`rounded  transition-colors px-2 py-1 ${isPrimary ? "bg-blue-900/70 hover:bg-blue-900/90 text-white" : "border-gray-900/10 hover:border-gray-900/50 text-blue-950 border-2"}`}>
       add category
     </button>
   )

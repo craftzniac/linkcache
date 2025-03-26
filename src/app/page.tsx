@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { objectStores } from "./constants";
 
 export default function Home() {
-  const { data: categories, isError, error } = useQuery<TCategory[], TError>({
+  const { data: categories, isError, error, isLoading } = useQuery<TCategory[], TError>({
     queryKey: [objectStores.CATEGORIES],
     queryFn: () => {
       return CategoryModel.getAllWithContent()
@@ -18,22 +18,42 @@ export default function Home() {
 
   return (
     <HomePageProvider>
-      <main className="flex p-2 justify-center overflow-y-auto mb-10">
+      <main className="flex p-2 justify-center overflow-y-auto mb-10 w-full h-full">
         <RenderDialogs />
-        <div className="flex flex-col max-w-[30rem] w-full gap-0.5">
-          <div className="flex w-full justify-end gap-2 items-center">
-            <AddCategoryBtn />
-            <AddLinkBtn />
-          </div>
-          <div className="flex flex-col gap-8 w-full">
+        <div className="flex flex-col max-w-[30rem] w-full h-full gap-0.5">
+          {
+            categories && categories?.length > 0 && (
+              <div className="flex w-full justify-end gap-2 items-center">
+                <AddCategoryBtn />
+                <AddLinkBtn />
+              </div>
+            )
+          }
+          <div className="flex  w-full h-full">
             {
-              isError ? (
-                <p>{error.error}</p>
+              isLoading ? (
+                <div className="h-full w-full flex justify-center items-center p-2">
+                  <p className="text-lg text-gray-600">Loading...</p>
+                </div>
               ) : (
-                categories && (
-                  categories.map(cat => (
-                    <Category key={cat.id} {...cat} />
-                  ))
+                isError ? (
+                  <div className="h-full w-full flex justify-center items-center p-2">
+                    <p className="text-lg text-gray-600">{error.error}</p>
+                  </div>
+                ) : (
+                  <ul className="flex  flex-col gap-8 w-full h-full">
+                    {
+                      categories && categories.length > 0 ? (
+                        categories.map(cat => (
+                          <li key={cat.id}> <Category  {...cat} /> </li>
+                        ))
+                      ) : (
+                        <div className="h-full w-full flex flex-col justify-center items-center p-2 gap-4">
+                          <p className="text-lg text-gray-600 max-w-80 text-center">You must create a category before you can save links</p>
+                          <AddCategoryBtn isPrimary />
+                        </div>
+                      )}
+                  </ul>
                 )
               )
             }
