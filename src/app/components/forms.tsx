@@ -15,7 +15,6 @@ export function LinkForm() {
   const mode = editableLink?.id ? "edit" : "new";
   const [state, setState] = useState<TLink | TNewLink>(editableLink || defaultState);
   const [errorUrl, setErrorUrl] = useState("");
-  const [errorTitle, setErrorTitle] = useState("");
   const queryClient = useQueryClient();
 
   const { mutateAsync: addLinkMut, isPending: isAddLinkPending } = useMutation({
@@ -39,32 +38,18 @@ export function LinkForm() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    const errors = {
-      errorUrl: "",
-      errorTitle: ""
-    }
-
     // input validation
     if (!state.url) {
-      errors.errorUrl = "Url should not be empty";
-    } else if (isValidUrl(state.url) == false) {
-      errors.errorUrl = "The text is not a valid url";
-    } else {
-      errors.errorUrl = "";
-    }
-
-    if (!state.title) {
-      errors.errorTitle = "Title should not be empty";
-    } else {
-      errors.errorTitle = "";
-    }
-
-
-    setErrorTitle(errors.errorTitle);
-    setErrorUrl(errors.errorUrl);
-    if (errors.errorTitle || errors.errorUrl) {   // force user to handle validation errors before submitting form
+      setErrorUrl("Url should not be empty");
       return;
     }
+
+    if (isValidUrl(state.url) == false) {
+      setErrorUrl("The text is not a valid url");
+      return;
+    }
+
+    setErrorUrl("");
 
     if (mode === "edit") {
       await editLinkMut(state as TLink);
@@ -97,7 +82,6 @@ export function LinkForm() {
             <div className="flex flex-col">
               <label htmlFor="title" className="font-medium">Title</label>
               <input id="title" type="text" placeholder="A css color generator" className="p-1 rounded" value={state.title} onChange={(e) => handleOnChange({ title: e.target.value })} />
-              <p className="text-red-400 text-sm">{errorTitle}</p>
             </div>
             <CategorySelect mode={mode} categoryId={state.category} onChange={useCallback((id) => handleOnChange({ category: id }), [])} />
             <button className="rounded bg-blue-900/70 hover:bg-blue-900/90 transition-colors px-2 py-1 text-white" disabled={isAddLinkPending || isEditLinkPending}>submit</button>
