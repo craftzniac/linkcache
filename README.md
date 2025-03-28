@@ -1,4 +1,4 @@
 # Linkcache
 
-- [ ] CRUD links
-- [ ] save links in indexedDB
+- [x] save links in indexedDB
+- [ ] enable import/export of links
