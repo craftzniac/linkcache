@@ -1,7 +1,7 @@
 "use client"
 import HomePageProvider from "./contexts/HomePageProvider";
 import Category from "./components/Category";
-import { AddCategoryBtn, AddLinkBtn } from "./components/addButtons";
+import { AddCategoryBtn, AddLinkBtn } from "./components/buttons";
 import { RenderDialogs } from "./components/dialogs";
 import CategoryModel from "@/app/datasource/models/Category"
 import { TCategory, TError } from "./types";

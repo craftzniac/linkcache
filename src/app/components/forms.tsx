@@ -6,6 +6,7 @@ import CategoryModel from "../datasource/models/Category"
 import LinkModel from "../datasource/models/Link"
 import { isValidUrl } from "../utils"
 import { objectStores } from "../constants"
+import { CloseBtn } from "./buttons"
 
 export function LinkForm() {
   const defaultState = {
@@ -66,9 +67,7 @@ export function LinkForm() {
 
   return (
     <div className="fixed inset-0 bg-white/50 flex flex-col justify-center p-2 overflow-auto">
-      <div className="flex justify-end w-full">
-        <button type="button" className="justify-self-end text-xl p-4" onClick={closeLinkForm}>close</button>
-      </div>
+      <CloseBtn action={closeLinkForm} />
 
       <div className="w-full h-full justify-center items-center flex border-gray-300">
         <form className="flex flex-col max-w-[20rem] w-full bg-gray-100 rounded p-4 shadow" onSubmit={handleSubmit}>
@@ -221,9 +220,7 @@ export function CategoryForm() {
 
   return (
     <div className="fixed inset-0 bg-white/50 flex flex-col items-start p-2 overflow-auto">
-      <div className="flex justify-end w-full">
-        <button type="button" className="justify-self-end text-xl p-4" onClick={closeCategoryForm}>close</button>
-      </div>
+      <CloseBtn action={closeCategoryForm} />
       <div className="flex w-full h-full justify-center items-center">
         <form className="flex flex-col max-w-[20rem] w-full bg-gray-100 rounded p-4 shadow" onSubmit={handleSubmit}>
           <fieldset className="flex flex-col gap-2">

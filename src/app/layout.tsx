@@ -25,7 +25,7 @@ export default function RootLayout({
         className={`h-dvh w-dvw text-blue-950 flex flex-col ${font.className}`}
       >
         <ReactQueryProvider>
-          <header className="font-bold flex w-full p-2 font-lg text-start">Linkcache</header>
+          <header className="font-bold flex w-full p-2 text-lg text-start">Linkcache</header>
           {children}
         </ReactQueryProvider>
       </body>
