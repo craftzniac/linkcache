@@ -52,10 +52,15 @@ export function LinkForm() {
 
     setErrorUrl("");
 
+
+    const url = state.url.trim().toLowerCase();
+    const title = state.title.trim();
+    const category = state.category;
+
     if (mode === "edit") {
-      await editLinkMut(state as TLink);
+      await editLinkMut({ url, title, category, id: (state as TLink).id } as TLink);
     } else {
-      await addLinkMut(state);
+      await addLinkMut({ url, title, category } as TLink);
       // clear state
       setState({ ...defaultState });
     }
@@ -209,10 +214,12 @@ export function CategoryForm() {
       return;
     }
     setErrorTitle("");
+
+    const title = state.title.trim();
     if (mode === "edit") {
-      await updateCategoryMut(state as TSimpleCategory);
+      await updateCategoryMut({ id: (state as TSimpleCategory).id, title });
     } else {
-      await addCategoryMut(state.title);
+      await addCategoryMut(title);
       // clear form state
       setState(initialState);
     }

@@ -1,7 +1,11 @@
 "use client"
 import { MouseEventHandler, useState } from "react"
-import { IconCopy, IconEdit, IconTrash, IconX } from "../assets/icons"
+import { IconCopy, IconEdit, IconExport, IconImport, IconTrash, IconX } from "../assets/icons"
 import { useHomePageContext } from "../contexts/HomePageProvider"
+import { useQuery } from "@tanstack/react-query"
+import { objectStores } from "../constants"
+import { TCategory, TError, TLink } from "../types"
+import CategoryModel from "../datasource/models/Category"
 export function AddLinkBtn() {
   const { openLinkForm } = useHomePageContext()
   return (
@@ -70,6 +74,86 @@ export function EditBtn({ action }: { action: MouseEventHandler<HTMLButtonElemen
   return (
     <button type="button" className="hover:bg-gray-100 p-2 rounded" onClick={action}>
       <IconEdit />
+    </button>
+  )
+}
+
+// export function ExportBtn({ action }: { action: MouseEventHandler<HTMLButtonElement> }) {
+export function ExportBtn() {
+  // fetch all links by their category
+  const { data: categories, isError, error, isLoading } = useQuery<TCategory[], TError>({
+    queryKey: [objectStores.CATEGORIES],
+    queryFn: () => {
+      return CategoryModel.getAllWithContent()
+    }
+  });
+  const [isShowLoading, setIsShowLoading] = useState(false);
+
+
+  async function handleExport() {
+    if (isLoading) {
+      setIsShowLoading(true);
+      return;
+    }
+    setIsShowLoading(false);
+    type TExportedLink = Omit<TLink, "id">;
+
+    if (isError) {
+      alert("Couldn't fetch links for export");
+      return;
+    }
+
+
+    // group all links together into one array and replace the category id with the category title for each link
+    const links = categories!.reduce((prev: TExportedLink[], curr) => {
+      const catLinks: TExportedLink[] = curr.children.map(link => ({
+        category: curr.title.trim(),
+        url: link.url.trim(),
+        title: link.title.trim(),
+      }));
+      return [...prev, ...catLinks];
+    }, [] as TExportedLink[]);
+
+
+    // create a blob with the list of links
+    const blob = new Blob([JSON.stringify(links)], { type: "text/json" });
+
+    // create a url for the blob
+    const url = URL.createObjectURL(blob);
+
+
+    // create an anchor tag
+    const downloadEl = document.createElement("a");
+    downloadEl.href = url;
+    downloadEl.download = "links.json"
+    // trigger downlaod
+    downloadEl.click();
+
+    // release the blob url after the download
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <button type="button" className="hover:bg-gray-100 p-2 rounded flex gap-1" onClick={handleExport}>
+      {
+        isShowLoading ? (
+          <p className="text-sm">Loading...</p>
+        ) : (
+          <>
+            <IconExport />
+            <span className="hidden sm:block text-sm font-normal">export</span>
+          </>
+        )
+      }
+    </button>
+  )
+}
+
+export function ImportBtn({ action }: { action: MouseEventHandler<HTMLButtonElement> }) {
+  return (
+    <button type="button" className="hover:bg-gray-100 p-2 rounded flex gap-1" onClick={action}>
+      <IconImport />
+      <span className="hidden sm:block text-sm font-normal">import</span>
     </button>
   )
 }
