@@ -81,7 +81,7 @@ export function EditBtn({ action }: { action: MouseEventHandler<HTMLButtonElemen
 // export function ExportBtn({ action }: { action: MouseEventHandler<HTMLButtonElement> }) {
 export function ExportBtn() {
   // fetch all links by their category
-  const { data: categories, isError, error, isLoading } = useQuery<TCategory[], TError>({
+  const { data: categories, isError, isLoading } = useQuery<TCategory[], TError>({
     queryKey: [objectStores.CATEGORIES],
     queryFn: () => {
       return CategoryModel.getAllWithContent()

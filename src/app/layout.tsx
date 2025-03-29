@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { IBM_Plex_Sans } from "next/font/google"
 import ReactQueryProvider from "./contexts/ReactQueryProvider";
-import { ExportBtn, ImportBtn } from "./components/buttons";
 import Header from "./components/Header";
 
 const font = IBM_Plex_Sans({
